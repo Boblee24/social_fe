@@ -16,7 +16,6 @@ const Home = () => {
   }, []);
   return (
     <div>
-      {/* <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laudantium eligendi ex incidunt repudiandae quos cumque totam veniam aperiam at non atque nihil reprehenderit necessitatibus rerum nisi rem, iusto quasi commodi?</p> */}
       <div className="grid gap-6 py-6 px-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((post, index) => (
           <div
