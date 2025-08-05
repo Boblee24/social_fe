@@ -256,7 +256,7 @@ function Post() {
                 <div key={comment.id || index} className="p-6 hover:bg-gray-50 transition-colors duration-200">
                   <div className="flex space-x-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-                      {comment.username ? comment.username.charAt(0).toUpperCase() : 'A'}
+                      {comment.username ? comment.username.charAt(0).toUpperCase() : 'B'}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
