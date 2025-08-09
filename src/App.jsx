@@ -3,6 +3,8 @@ import CreatePost from "./pages/CreatePost";
 import Home from "./pages/Home";
 import {BrowserRouter as Router, Routes, Route, Link} from "react-router-dom";
 import Post from "./pages/Post";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
 
 function App() {
 
@@ -14,6 +16,8 @@ function App() {
         <Link to="/createpost">Create Post</Link> 
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/createpost" element={<CreatePost />} />
           <Route path="/post/:id" element={<Post />} />
         </Routes>
