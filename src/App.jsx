@@ -14,6 +14,8 @@ function App() {
     <div className="p-4">
       <Router>
         <Link to="/createpost">Create Post</Link> 
+        <Link to="/login">Login</Link>
+        <Link to="/signup">Sign Up</Link>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />

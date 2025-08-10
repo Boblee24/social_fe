@@ -4,13 +4,14 @@ import { useState } from "react";
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const onSubmit = async () => {
+  const onSubmit = async (e) => {
+    e.preventDefault();
     const data = {
       username: username,
       password: password,
     };
     try {
-      const respose = await fetch("http://localhost:3001/users/login", {
+      const respose = await fetch("http://localhost:3001/auth/login", {
         body: JSON.stringify(data),
         method: "POST",
         headers: {
