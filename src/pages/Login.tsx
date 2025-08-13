@@ -18,6 +18,14 @@ function Login() {
           "Content-Type": "application/json",
         },
       });
+
+      const result = await respose.json();
+      if (!respose.ok) {
+        console.log(result)
+      } else {
+        sessionStorage.setItem("accessToken", result.accessToken);
+        console.log(result.success);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -35,7 +43,9 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
-        <button type="submit" onClick={onSubmit}>Login</button>
+        <button type="submit" onClick={onSubmit}>
+          Login
+        </button>
       </form>
     </div>
   );
