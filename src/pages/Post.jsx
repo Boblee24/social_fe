@@ -48,14 +48,18 @@ function Post() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        accessToken: sessionStorage.getItem("token"),
+        accessToken: sessionStorage.getItem("accessToken"),
       },
       body: JSON.stringify({ PostId: id, commentText }),
     });
 
-    if (!response.ok) throw new Error("Failed to submit comment");
+    if (!response.ok){
+        console.log("Error creating comment:", response.statusText);
+        return;
+    }
     
-    const newComment = await response.json(); // ✅ Properly indented inside try block
+    const newComment = await response.json(); // ✅ Properly indented inside t
+    
     setComments(prev => [newComment, ...prev]);
     setCommentText("");
     setShowCommentForm(false);
@@ -65,6 +69,7 @@ function Post() {
     setIsSubmitting(false);
   }
 };
+// console.log(newComment)
 
   let timeAgo = "";
   if (post && post.createdAt) {
