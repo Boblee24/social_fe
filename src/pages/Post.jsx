@@ -48,7 +48,7 @@ function Post() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        accessToken: sessionStorage.getItem("accessToken"),
+        accessToken: localStorage.getItem("accessToken"),
       },
       body: JSON.stringify({ PostId: id, commentText }),
     });

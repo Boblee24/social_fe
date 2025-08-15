@@ -1,9 +1,10 @@
-import React from "react";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "../helpers/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { setAuthState } = useContext(AuthContext);
   const onSubmit = async (e) => {
     e.preventDefault();
     const data = {
@@ -23,7 +24,8 @@ function Login() {
       if (!respose.ok) {
         console.log(result)
       } else {
-        sessionStorage.setItem("accessToken", result.accessToken);
+        localStorage.setItem("accessToken", result.accessToken);
+        setAuthState(true);
         console.log(result.success);
       }
     } catch (error) {
