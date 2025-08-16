@@ -34,8 +34,7 @@ function App() {
         const data = await response.json();
         if (!response.ok) {
           setAuthState({
-            username: "",
-            id: 0,
+            ...authState,
             status: false,
           });
         } else {

@@ -2,7 +2,13 @@ import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { AuthContext } from "../helpers/AuthContext";
-import { FiHeart, FiMessageCircle, FiShare2, FiBookmark, FiX } from "react-icons/fi";
+import {
+  FiHeart,
+  FiMessageCircle,
+  FiShare2,
+  FiBookmark,
+  FiX,
+} from "react-icons/fi";
 
 function Post() {
   const { id } = useParams();
@@ -12,6 +18,8 @@ function Post() {
   const [commentText, setCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState([]);
 
   const { authState } = useContext(AuthContext);
 
@@ -38,19 +46,36 @@ function Post() {
         console.log("Error fetching comments:", error);
       }
     };
+    const getLikes = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/like/${id}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setLikes(data);
+          return;
+        }
+      } catch (error) {
+        console.log("Error fetching likes", error);
+      }
+    };
     getPost();
     getComments();
+    getLikes();
   }, [id]);
 
   const deleteComment = async (commentId) => {
     try {
-      const response = await fetch(`http://localhost:3001/comments/${commentId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          accessToken: localStorage.getItem("accessToken"),
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3001/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            accessToken: localStorage.getItem("accessToken"),
+          },
+        }
+      );
       if (!response.ok) {
         console.error("Failed to delete comment");
         return;
@@ -81,7 +106,7 @@ function Post() {
       }
 
       const newComment = await response.json();
-      setComments(prev => [newComment, ...prev]);
+      setComments((prev) => [newComment, ...prev]);
       setCommentText("");
       setShowCommentForm(false);
     } catch (error) {
@@ -90,7 +115,54 @@ function Post() {
       setIsSubmitting(false);
     }
   };
+  console.log(liked);
 
+  const handleLike = async (newLiked) => {
+    try {
+      const response = await fetch(`http://localhost:3001/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accessToken: localStorage.getItem("accessToken"),
+        },
+        body: JSON.stringify({ PostId: id, liked: newLiked }),
+      });
+
+      const data = await response.json()
+      if (response.ok) {
+        setLikes((prev) => [...prev, data])
+        return;
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUnlike = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/like`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          accessToken: localStorage.getItem("accessToken"),
+        },
+      });
+
+      if (response.ok) {
+        setLikes((prev) =>
+        prev.filter((like) => like.username !== authState.username)
+      );
+        return;
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }; 
+  const userHasLiked = likes.some((like) => like.username === authState.username);
   let timeAgo = "";
   if (post && post.createdAt) {
     timeAgo = formatDistanceToNow(new Date(post.createdAt), {
@@ -111,19 +183,31 @@ function Post() {
       {/* Post */}
       <div className="bg-white border rounded-lg p-6">
         <h1 className="text-2xl font-bold mb-3">{post.title}</h1>
-        
+
         <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
           <span>By {post.username}</span>
           <span>{timeAgo}</span>
         </div>
-        
+
         <p className="text-gray-700 mb-4">{post.postText}</p>
-        
+
         <div className="flex items-center gap-4 pt-4 border-t">
-          <button className="flex items-center gap-2 text-gray-600 hover:text-red-500">
-            <FiHeart /> Like
-          </button>
-          <button 
+          <button
+  className={`flex items-center gap-2 ${
+    userHasLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"
+  }`}
+  onClick={() => {
+    if (userHasLiked) {
+      handleUnlike();
+    } else {
+      setLiked(true);
+      handleLike(true);
+    }
+  }}
+>
+  <FiHeart /> Like ({likes.length})
+</button>
+          <button
             onClick={() => setShowCommentForm(!showCommentForm)}
             className="flex items-center gap-2 text-gray-600 hover:text-blue-500"
           >
@@ -174,7 +258,7 @@ function Post() {
         <div className="p-4 border-b">
           <h2 className="font-semibold">Comments ({comments.length})</h2>
         </div>
-        
+
         {comments.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p>No comments yet</p>
@@ -191,10 +275,14 @@ function Post() {
               <div key={comment.id} className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <span className="font-medium">{comment.username || "Anonymous"}</span>
+                    <span className="font-medium">
+                      {comment.username || "Anonymous"}
+                    </span>
                     <span className="text-sm text-gray-500 ml-2">
                       {comment.createdAt
-                        ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })
+                        ? formatDistanceToNow(new Date(comment.createdAt), {
+                            addSuffix: true,
+                          })
                         : "just now"}
                     </span>
                   </div>
@@ -209,8 +297,12 @@ function Post() {
                 </div>
                 <p className="text-gray-700 mb-3">{comment.commentText}</p>
                 <div className="flex gap-4">
-                  <button className="text-sm text-gray-500 hover:text-blue-600">Like</button>
-                  <button className="text-sm text-gray-500 hover:text-blue-600">Reply</button>
+                  <button className="text-sm text-gray-500 hover:text-blue-600">
+                    Like
+                  </button>
+                  <button className="text-sm text-gray-500 hover:text-blue-600">
+                    Reply
+                  </button>
                 </div>
               </div>
             ))}

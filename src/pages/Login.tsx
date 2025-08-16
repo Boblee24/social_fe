@@ -28,7 +28,7 @@ function Login() {
         setAuthState({
           username: result.username,
           id: result.id,
-          statue: true,
+          status: true,
         });
         console.log(result.success);
       }
