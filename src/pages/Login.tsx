@@ -25,7 +25,11 @@ function Login() {
         console.log(result)
       } else {
         localStorage.setItem("accessToken", result.accessToken);
-        setAuthState(true);
+        setAuthState({
+          username: result.username,
+          id: result.id,
+          statue: true,
+        });
         console.log(result.success);
       }
     } catch (error) {
