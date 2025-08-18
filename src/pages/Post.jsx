@@ -18,7 +18,7 @@ function Post() {
   const [commentText, setCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
-  const [liked, setLiked] = useState(false);
+  // const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState([]);
 
   const { authState } = useContext(AuthContext);
@@ -115,53 +115,38 @@ function Post() {
       setIsSubmitting(false);
     }
   };
-  console.log(liked);
 
-  const handleLike = async (newLiked) => {
-    try {
-      const response = await fetch(`http://localhost:3001/like`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          accessToken: localStorage.getItem("accessToken"),
-        },
-        body: JSON.stringify({ PostId: id, liked: newLiked }),
-      });
+const handleToggleLike = async () => {
+  try {
+    const response = await fetch(`http://localhost:3001/like`, {
+      method: "POST", // still POST — backend handles toggle
+      headers: {
+        "Content-Type": "application/json",
+        accessToken: localStorage.getItem("accessToken"),
+      },
+      body: JSON.stringify({ PostId: id }), // ✅ no need to send "liked"
+    });
 
-      const data = await response.json()
-      if (response.ok) {
-        setLikes((prev) => [...prev, data])
-        return;
-      }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const data = await response.json();
 
-  const handleUnlike = async () => {
-    try {
-      const response = await fetch(`http://localhost:3001/like`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          accessToken: localStorage.getItem("accessToken"),
-        },
-      });
-
-      if (response.ok) {
+    if (response.ok) {
+      if (data.message === "Unliked successfully") {
+        // ✅ Remove like from local state
         setLikes((prev) =>
-        prev.filter((like) => like.username !== authState.username)
-      );
-        return;
+          prev.filter((like) => like.username !== authState.username)
+        );
+      } else {
+        // ✅ Add like to local state
+        setLikes((prev) => [...prev, data]);
       }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsSubmitting(false);
     }
-  }; 
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
   const userHasLiked = likes.some((like) => like.username === authState.username);
   let timeAgo = "";
   if (post && post.createdAt) {
@@ -197,16 +182,12 @@ function Post() {
     userHasLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"
   }`}
   onClick={() => {
-    if (userHasLiked) {
-      handleUnlike();
-    } else {
-      setLiked(true);
-      handleLike(true);
-    }
+    handleToggleLike(!userHasLiked); // toggle like/unlike in one function
   }}
 >
   <FiHeart /> Like ({likes.length})
 </button>
+
           <button
             onClick={() => setShowCommentForm(!showCommentForm)}
             className="flex items-center gap-2 text-gray-600 hover:text-blue-500"
