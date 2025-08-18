@@ -1,16 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiHeart } from "react-icons/fi";
+import { AuthContext } from "../helpers/AuthContext"; // 👈 import context
 
-const Home = ( ) => {
+const Home = () => {
   const history = useNavigate();
+  const { authState } = useContext(AuthContext); // 👈 get logged-in user
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch posts with likeCount included
+  // ✅ Fetch posts (now includes PostLikes array)
   const getPosts = async () => {
     try {
-      const response = await fetch("http://localhost:3001/posts");
+      const response = await fetch("http://localhost:3001/posts", {
+        headers: {
+          accessToken: localStorage.getItem("accessToken"), // required since route is protected
+        },
+      });
       const data = await response.json();
       setPosts(data);
     } catch (error) {
@@ -18,37 +24,45 @@ const Home = ( ) => {
     }
   };
 
-  // ✅ Handle toggle like (same as Post.jsx)
+  // ✅ Toggle Like / Unlike
   const handleToggleLike = async (postId) => {
     setLoading(true);
     try {
       const response = await fetch(`http://localhost:3001/like`, {
-        method: "POST", // still POST — backend handles toggle
+        method: "POST", // backend handles toggle
         headers: {
           "Content-Type": "application/json",
           accessToken: localStorage.getItem("accessToken"),
         },
-        body: JSON.stringify({ PostId: postId }), // ✅ no need to send "liked"
+        body: JSON.stringify({ PostId: postId }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         if (data.message === "Unliked successfully") {
-          // ✅ Remove like from local state
+          // remove current user from PostLikes
           setPosts((prev) =>
             prev.map((p) =>
               p.id === postId
-                ? { ...p, likeCount: p.likeCount - 1, userHasLiked: false }
+                ? {
+                    ...p,
+                    PostLikes: p.PostLikes.filter(
+                      (like) => like.username !== authState.username
+                    ),
+                  }
                 : p
             )
           );
         } else {
-          // ✅ Add like to local state
+          // add current user to PostLikes
           setPosts((prev) =>
             prev.map((p) =>
               p.id === postId
-                ? { ...p, likeCount: p.likeCount + 1, userHasLiked: true }
+                ? {
+                    ...p,
+                    PostLikes: [...p.PostLikes, { username: authState.username }],
+                  }
                 : p
             )
           );
@@ -64,12 +78,16 @@ const Home = ( ) => {
   useEffect(() => {
     getPosts();
   }, []);
+  console.log(posts)
 
   return (
     <div>
       <div className="grid gap-6 py-6 px-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => {
-          const userHasLiked = post.userHasLiked || false;
+          const likeCount = post.PostLikes?.length || 0;
+          const userHasLiked = post.PostLikes?.some(
+            (like) => like.username === authState.username
+          );
 
           return (
             <div
@@ -87,7 +105,7 @@ const Home = ( ) => {
                 </p>
               </div>
 
-              {/* Like Button - Updated to use handleToggleLike */}
+              {/* Like Button */}
               <button
                 className={`flex items-center gap-2 mt-3 ${
                   userHasLiked
@@ -98,7 +116,7 @@ const Home = ( ) => {
                 onClick={() => handleToggleLike(post.id)}
               >
                 <FiHeart />
-                Like ({post.likeCount || 0})
+                {userHasLiked ? "Unlike" : "Like"} ({likeCount})
               </button>
             </div>
           );
