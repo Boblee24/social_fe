@@ -55,7 +55,6 @@ const Home = () => {
             )
           );
         } else {
-          // add current user to PostLikes
           setPosts((prev) =>
             prev.map((p) =>
               p.id === postId
