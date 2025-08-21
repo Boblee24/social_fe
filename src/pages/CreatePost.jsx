@@ -6,15 +6,10 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const initialValues = {
     title: "",
-    username: "",
     postText: "",
   };
   const postSchema = Yup.object().shape({
     title: Yup.string()
-      .min(2, "Too Short!")
-      .max(50, "Too Long!")
-      .required("Required"),
-    username: Yup.string()
       .min(2, "Too Short!")
       .max(50, "Too Long!")
       .required("Required"),
@@ -29,6 +24,7 @@ const CreatePost = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          accessToken: localStorage.getItem("accessToken"),
         },
         body: JSON.stringify(data),
       });
@@ -69,27 +65,6 @@ const CreatePost = () => {
                   className="text-red-500 text-sm"
                 />
               </div>
-
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm text-gray-600 mb-1"
-                >
-                  Username
-                </label>
-                <Field
-                  id="username"
-                  name="username"
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                />
-                <ErrorMessage
-                  name="username"
-                  component="div"
-                  className="text-red-500 text-sm"
-                />
-              </div>
-
               <div>
                 <label
                   htmlFor="postText"
