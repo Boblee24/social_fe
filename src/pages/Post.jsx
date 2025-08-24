@@ -116,38 +116,40 @@ function Post() {
     }
   };
 
-const handleToggleLike = async () => {
-  try {
-    const response = await fetch(`http://localhost:3001/like`, {
-      method: "POST", // still POST — backend handles toggle
-      headers: {
-        "Content-Type": "application/json",
-        accessToken: localStorage.getItem("accessToken"),
-      },
-      body: JSON.stringify({ PostId: id }), // ✅ no need to send "liked"
-    });
+  const handleToggleLike = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/like`, {
+        method: "POST", // still POST — backend handles toggle
+        headers: {
+          "Content-Type": "application/json",
+          accessToken: localStorage.getItem("accessToken"),
+        },
+        body: JSON.stringify({ PostId: id }), // ✅ no need to send "liked"
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      if (data.message === "Unliked successfully") {
-        // ✅ Remove like from local state
-        setLikes((prev) =>
-          prev.filter((like) => like.username !== authState.username)
-        );
-      } else {
-        // ✅ Add like to local state
-        setLikes((prev) => [...prev, data]);
+      if (response.ok) {
+        if (data.message === "Unliked successfully") {
+          // ✅ Remove like from local state
+          setLikes((prev) =>
+            prev.filter((like) => like.username !== authState.username)
+          );
+        } else {
+          // ✅ Add like to local state
+          setLikes((prev) => [...prev, data]);
+        }
       }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
-  const userHasLiked = likes.some((like) => like.username === authState.username);
+  const userHasLiked = likes.some(
+    (like) => like.username === authState.username
+  );
   let timeAgo = "";
   if (post && post.createdAt) {
     timeAgo = formatDistanceToNow(new Date(post.createdAt), {
@@ -178,15 +180,15 @@ const handleToggleLike = async () => {
 
         <div className="flex items-center gap-4 pt-4 border-t">
           <button
-  className={`flex items-center gap-2 ${
-    userHasLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"
-  }`}
-  onClick={() => {
-    handleToggleLike(!userHasLiked); // toggle like/unlike in one function
-  }}
->
-  <FiHeart /> Like ({likes.length})
-</button>
+            className={`flex items-center gap-2 ${
+              userHasLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"
+            }`}
+            onClick={() => {
+              handleToggleLike(!userHasLiked); // toggle like/unlike in one function
+            }}
+          >
+            <FiHeart /> Like ({likes.length})
+          </button>
 
           <button
             onClick={() => setShowCommentForm(!showCommentForm)}
@@ -201,6 +203,7 @@ const handleToggleLike = async () => {
             <FiBookmark />
           </button>
         </div>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit explicabo ullam eaque recusandae quos autem debitis maiores perferendis animi, porro assumenda suscipit! Eligendi quibusdam modi ab quae quia ipsum quod?</p>
       </div>
 
       {/* Comment Form */}
