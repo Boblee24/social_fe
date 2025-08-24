@@ -9,7 +9,7 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch posts (now includes PostLikes array)
+  // ✅ Fetch posts (now includes Postkes array)
   const getPosts = async () => {
     try {
       const response = await fetch("http://localhost:3001/posts", {
