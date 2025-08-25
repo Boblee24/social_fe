@@ -109,6 +109,7 @@ const User = () => {
                 <div className="flex justify-between items-center text-sm text-gray-500">
                   <span>By: {post.username}</span>
                   <span>Post ID: {post.id}</span>
+                  {/* <p></p> */}
                 </div>
                 
                 {post.createdAt !== post.updatedAt && (
